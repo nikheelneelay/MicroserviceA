@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservice-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: micro-a
+  template:
+    metadata:
+      labels:
+        app: micro-a
+    spec:
+     containers:
+      - name: microservice-a
+        image: nikheelcapita/repo1:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80

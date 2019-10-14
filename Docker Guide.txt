@@ -1,0 +1,277 @@
+Docker commands
+
+1. create dockerfile
+
+2. Add step in it 
+	From - "from which image"
+	copy - " copy file from local folder to docker container"
+	ENTRYPOINT - which command to execute
+	
+3. build docker file
+	docker build -t "tag name" -f "Dockerfile" .(here . reperesents current directory)
+	
+4. Create a container
+	docker create "container name" (same as image name)
+	
+7. start a docker container
+	docker start "name of image"
+	
+5. view all containers
+	docker ps -a
+	
+6. Create an run image and container in single command
+	docker run -it --rm myimage
+ - run your image with - 
+	docker run -p 4000:80 friendlyhello
+
+	
+8. stop a container 
+	docker stop "name of image"
+	
+9. Attach to a container without exiting using ctrl command
+	docker attach --sig-proxy=false "name of image"
+	
+10. see all images
+	docker images
+
+11. Run docker image as container with name
+	docker run -p 8012:80 --name "<container name>" -d "<image = name>"
+	
+**Create and run container**
+
+ docker run -it --rm -p 5000:5000 --link sqlserver -e SQLSERVER_HOST=sqlserver dotnet-example
+
+Stop all docker container 
+ FOR /f "tokens=*" %i IN ('docker ps -q') DO docker stop %i
+ 
+Remove all stopped docker containers
+
+
+---------------------------------.net core with sql -----------------------------------------
+
+1. Downalod sql server image 
+
+	docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Testing123' -p 1433:1433 --name sqlserver -d microsoft/mssql-server-linux
+	
+2. Make changes in application to use dynamic connection string
+
+	public void ConfigureServices(IServiceCollection services)
+	{
+		// Add framework services.
+		services.AddMvc();
+
+		var hostname = Environment.GetEnvironmentVariable("SQLSERVER_HOST") ?? "localhost";
+		var password = Environment.GetEnvironmentVariable("SQLSERVER_SA_PASSWORD") ?? "Testing123";
+		var connString = $"Data Source={hostname};Initial Catalog=KontenaAspnetCore;User ID=sa;Password={password};";
+
+		services.AddDbContext<ApiContext>(options => options.UseSqlServer(connString));
+	}            
+
+3. Link sql server image with application image and run 
+
+	docker run -it --rm -p 5000:5000 --link sqlserver -e SQLSERVER_HOST=sqlserver "image name"
+
+ 
+--------------------------Push Docker image-------------------------------------
+
+1. Login to docker
+	docker login
+
+2. tag the image
+	docker tag micro-a nikheelcapita/repo1:v2
+	
+3. Push the tagged image
+	docker push nikheelcapita/repo1:v2
+	
+4. View all pushed images
+	
+	docker images nikheelcapita/repo1
+
+ 
+---------------------------- Clean up ------------------------------
+ docker system prune
+ docker system prune --volumes
+ docker container prune
+In power shell - remove all containers
+ docker container stop $(docker container ls -aq)
+ 
+ 
+ -----------------------------------Kuberneste ------------------------------
+ 0. Run image on kubernetes
+	
+	kubectl run --image "image name"
+ 
+ 1. Check all the available kubernetes instances
+	kubectl config get-contexts
+	
+2. Use sepcific contexts
+	kubectl config use-context docker-for-desktop
+	
+3. Create a Pod kind kubereneste file to create a pod
+		
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	  name: microservice-a
+	spec:
+	  containers:
+	  - name: microservice-a
+		image: nikheelcapita/repo1
+		imagePullPolicy: IfNotPresent
+		ports:
+		- containerPort: 80
+
+4. Apply above pod kind file with command to create a running pod
+	kubectl apply -f "above file name.yaml"
+	
+5. View config file of kubernetes
+	kubectl config view
+	
+6. View Kubernetes Dashbord
+
+	a. Run following command to dowload files
+	
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommende
+
+	b. Create a sample user and Clusterrolebinding by running following file
+	
+	apiVersion: v1
+	kind: ServiceAccount
+	metadata:
+	  name: admin-user
+	  namespace: kubernetes-dashboard
+	apiVersion: rbac.authorization.k8s.io/v1
+	kind: ClusterRoleBinding
+	metadata:
+	  name: admin-user
+	roleRef:
+	  apiGroup: rbac.authorization.k8s.io
+	  kind: ClusterRole
+	  name: cluster-admin
+	subjects:
+	- kind: ServiceAccount
+	  name: admin-user
+	  namespace: kubernetes-dashboard
+ 
+	c. Generate Bearer Token
+ 
+	kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
+	
+	d. Copy the generated token
+	
+	e. start proxy
+	
+	kubectl proxy
+	
+	f. access the url
+	
+	http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+	
+	g. enter the token
+	
+	Please Note above steps are applicable for kubernetes-dashboard namespace only
+	
+7. Once pod is successfully created and running, check if application is working by doing port forward operation.
+	It attcahed exposed port of pod to hosts port
+	
+	kubectl port-forward "pod name" "any localhost port number":"exposed port number from pod"
+	
+	kubectl port-forward microservice-a 8011:80
+	
+8. Replica set - set the number of pods to be always up, then assign labels to pod containers as replica set match based on lables
+
+	apiVersion: apps/v1
+	kind: ReplicaSet
+	metadata:
+	  name: micro-replicaset
+	spec:
+	  # modify replicas according to your case
+	  replicas: 3
+	  selector:
+		matchLabels:
+		  app: micro-a 
+	  template:
+		metadata:
+		  labels:
+			app: micro-a
+		spec:
+		 containers:
+		  - name: microservice-a
+			image: nikheelcapita/repo1:v2
+			imagePullPolicy: IfNotPresent
+			ports:
+			- containerPort: 80
+			
+9. Deployments - deployment is used for uploading pods and also provide roleback feature 
+
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	  name: microservice-deployment
+	  # same as replica set defination
+	spec:
+	  replicas: 3
+	  selector:
+		matchLabels:
+		  app: micro-a
+	  template:
+		metadata:
+		  labels:
+			app: micro-a
+		spec:
+		 containers:
+		  - name: microservice-a
+			image: nikheelcapita/repo1:v2
+			imagePullPolicy: IfNotPresent
+			ports:
+			- containerPort: 80
+
+10. Chnage the image name is deployemnt file and old version will be deleted and new will be created
+
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	  name: microservice-deployment
+	spec:
+	  replicas: 3
+	  selector:
+		matchLabels:
+		  app: micro-a
+	  template:
+		metadata:
+		  labels:
+			app: micro-a
+		spec:
+		 containers:
+		  - name: microservice-a
+			image: nikheelcapita/repo1:v1
+			imagePullPolicy: IfNotPresent
+			ports:
+			- containerPort: 80
+			
+11. Use decribe command to see how in deployments two versions were switched
+	
+	kubectl describe "resouce type" "resource name"
+	
+	kubectl describe deployments microservice-deployment
+	
+12. View all the revisions of deployment
+	
+	kubectl rollout history deployment "name of deployment"
+	
+	kubectl rollout history deployments microservice-deployment
+	
+13. Rollout deployment to previous version
+
+	kubectl rollout undo deployments microservice-deployment
+	
+14. 
+
+	
+
+	
+
+ 
+
+ 
+ 

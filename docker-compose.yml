@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  microservicea:
+    image: ${DOCKER_REGISTRY}microawithdb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on: 
+      - micro-a-db
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=micro-a-db;Database=School;uid=sa;pwd=P@ssw0rd;MultipleActiveResultSets=true
+
+  micro-a-db:
+    image: microsoft/mssql-server-linux
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=P@ssw0rd

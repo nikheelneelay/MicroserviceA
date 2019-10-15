@@ -1,5 +1,12 @@
 Docker commands
 
+--------------Useful help commands-----------------------
+
+docker logs "conatiner id starting 5 characters"
+
+docker inspect "conatiner id starting 5 characters"
+----------------------------------------------------
+
 1. create dockerfile
 
 2. Add step in it 
@@ -70,7 +77,46 @@ Remove all stopped docker containers
 3. Link sql server image with application image and run 
 
 	docker run -it --rm -p 5000:5000 --link sqlserver -e SQLSERVER_HOST=sqlserver "image name"
+	
+	
+	
+-----------------------------------------.Net core and sql with docker compose---------------------------
 
+1. Add docker compose file to project
+	
+	version: '3.4'
+
+	services:
+	  microservicea:
+		image: ${DOCKER_REGISTRY}microawithdb
+		build:
+		  context: .
+		  dockerfile: Dockerfile
+		depends_on: 
+		  - micro-a-db
+		environment:
+		  - ConnectionStrings__DefaultConnection=Server=micro-a-db;Database=School;uid=sa;pwd=P@ssw0rd;MultipleActiveResultSets=true
+
+	  micro-a-db:
+		image: microsoft/mssql-server-linux
+		ports:
+		  - "1433:1433"
+		environment:
+		  - ACCEPT_EULA=Y
+		  - SA_PASSWORD=P@ssw0rd
+
+2. In code connect to db as:
+	
+	services.AddDbContext<SchoolContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+				
+3. In appseting
+
+	"ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=School;uid=sa;pwd=P@ssw0rd;MultipleActiveResultSets=true"
+  }
+  
+4. Do a docker compose up directly, if we do docker-compose build then it creates a container for db and says port is in use error.
  
 --------------------------Push Docker image-------------------------------------
 
@@ -94,6 +140,10 @@ Remove all stopped docker containers
  docker container prune
 In power shell - remove all containers
  docker container stop $(docker container ls -aq)
+ 
+ remove all unused images
+ 
+ docker system prune -a
  
  
  -----------------------------------Kuberneste ------------------------------

@@ -23,13 +23,8 @@ namespace MicroserviceA
         {
             services.AddControllers();
 
-            var hostname = Environment.GetEnvironmentVariable("SQLSERVER_HOST") ?? "localhost";
-            var password = Environment.GetEnvironmentVariable("SQLSERVER_SA_PASSWORD") ?? "Testing123";
-            var connString = $"Data Source={hostname};Initial Catalog=SchoolContext;User ID=sa;Password={password};";
-
-
             services.AddDbContext<SchoolContext>(options =>
-           options.UseSqlServer(connString));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

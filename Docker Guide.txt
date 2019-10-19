@@ -47,11 +47,17 @@ docker inspect "conatiner id starting 5 characters"
 **Create and run container**
 
  docker run -it --rm -p 5000:5000 --link sqlserver -e SQLSERVER_HOST=sqlserver dotnet-example
+ 
+ or
+ 
+ docker run -it -d --rm --name ubuntu1 ubuntu /bin/bash
 
 Stop all docker container 
  FOR /f "tokens=*" %i IN ('docker ps -q') DO docker stop %i
  
 Remove all stopped docker containers
+
+	docker rm -f container ids space seperated
 
 
 ---------------------------------.net core with sql -----------------------------------------

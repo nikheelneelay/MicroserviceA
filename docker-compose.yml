@@ -2,7 +2,9 @@ version: '3.4'
 
 services:
   microservicea:
-    image: ${DOCKER_REGISTRY}microawithdb
+    image: nikheelcapita/repo1:v3
+    ports:
+      - "8017:80"
     build:
       context: .
       dockerfile: Dockerfile

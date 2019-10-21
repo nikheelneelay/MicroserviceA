@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: microservice-deployment
+  name: micro-a-deployment
 spec:
   replicas: 3
   selector:
-    matchLabels:
-      app: micro-a
+      matchLabels:
+        app: micro-a
   template:
     metadata:
       labels:
         app: micro-a
     spec:
-     containers:
-      - name: microservice-a
+      containers:
+      - name: micro-a
         image: nikheelcapita/repo1:v4
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 443
-          name: microservice-a
+        - containerPort: 80
+          name: micro-a
         env:
         - name: ConnectionStrings__DefaultConnection
-          value: "Server=mssql-service;Database=Tasks;uid=sa;pwd=P@ssw0rd;MultipleActiveResultSets=true"
+          value: "Server=mssql-service;Database=School;uid=sa;pwd=P@ssw0rd;MultipleActiveResultSets=true"
 ---
 kind: Service
 apiVersion: v1
@@ -33,7 +33,7 @@ spec:
   type: NodePort
   ports:
   - port: 8099
-    targetPort: 443
+    targetPort: 80
 ---
 kind: Deployment
 apiVersion: apps/v1

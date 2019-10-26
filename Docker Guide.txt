@@ -328,7 +328,19 @@ In power shell - remove all containers
 
 	kubectl rollout undo deployments microservice-deployment
 	
-14. 
+-----------------------Connecting to Service----------------------------------
+
+Service exposes a port which can be used to connect with pods on UI
+
+In our example 
+
+micro-a-svc:8099 TCP
+micro-a-svc:31194 TCP
+
+8099 is internally used by pods to communicate with services
+31194 is exposed to outside world
+
+----------------------------------------------------------------------
 
 	
 

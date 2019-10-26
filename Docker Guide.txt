@@ -194,7 +194,7 @@ In power shell - remove all containers
 
 	a. Run following command to dowload files
 	
-	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommende
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommended.yaml
 
 	b. Create a sample user and Clusterrolebinding by running following file
 	

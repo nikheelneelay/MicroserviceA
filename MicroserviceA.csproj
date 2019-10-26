@@ -10,9 +10,11 @@
 
   <ItemGroup>
     <None Remove="k8s\DeploymentwithserviceandSQL.yaml" />
+    <None Remove="k8s\DeploymentwithserviceandSQLAndVolume.yaml" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="k8s\DeploymentwithserviceandSQLAndVolume.yaml" />
     <Content Include="k8s\DeploymentwithserviceandSQL.yaml" />
   </ItemGroup>
 
